@@ -1,6 +1,8 @@
-# Python for Finance - Predict Stock Market Price using Tensorflow 2 and Keras 
+# Python for Finance
+# Predict Stock Market Price using Tensorflow 2 and Keras 
 
 Trading Market Prediction using Tensorflow 2 and Keras 
+tensorflow pandas numpy matplotlib yahoo finance api and sklearn 
 
 Foreseeing stock costs has consistently been an alluring point to the two speculators and analysts. Speculators consistently question if the cost of a stock will rise or not, since there are many confounded monetary pointers that solitary financial specialists and individuals with great account information can comprehend, the pattern of securities exchange is conflicting and look extremely irregular to customary individuals.
 
