@@ -6,7 +6,7 @@ Foreseeing stock costs has consistently been an alluring point to the two specul
 
 The reason for this personnal project is to construct a neural networks in TensorFlow 2 and Keras that predicts financial exchange costs.  More specifically, we will assemble a Recurrent Neural Network with LSTM cells as it is the present status of-the-craftsmanship in time arrangement forecasting.
 
-Okay, we should get start. To begin with, you need to introduce Tensorflow 2 and different libraries:
+To begin with, you need to install those Tensorflow 2 and different libraries:
 
 ```
 pip3 install tensorflow pandas numpy matplotlib yahoo_fin sklearn
