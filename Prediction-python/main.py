@@ -27,6 +27,7 @@ def shuffle_in_unison(a, b):
     np.random.shuffle(a)
     np.random.shuffle(b)
 
+
 """
     Loads data from Yahoo Finance source, as well as scaling, shuffling, normalizing and splitting.
     Params from Documentation:
@@ -41,13 +42,15 @@ def shuffle_in_unison(a, b):
         feature_columns (list): the list of features to use to feed into the model, default is everything grabbed from yahoo_fin
     """
 
-def load_data(ticker, n_steps=50, scale=True, shuffle=True, lookup_step=1, split_by_date=True, test_size=0.2, features_columns=['adjclose', 'volume', 'open', 'high', 'low']):
-    #Check if market is loaded from yahoo
+
+def load_data(ticker, n_steps=50, scale=True, shuffle=True, lookup_step=1, split_by_date=True, test_size=0.2,
+              features_columns=['adjclose', 'volume', 'open', 'high', 'low']):
+    # Check if market is loaded from yahoo
     if isinstance(ticker, str):
-        #then load it from yahoo_fin api
+        # then load it from yahoo_fin api
         df = si.get_data(ticker)
     elif isinstance(ticker, pd.DataFrame):
-        #if downloaded then use it
+        # if downloaded then use it
         df = ticker
     else:
         raise TypeError("ticker can be a str or a pd.DataFrame instances only.")
@@ -84,7 +87,7 @@ def load_data(ticker, n_steps=50, scale=True, shuffle=True, lookup_step=1, split
     # for instance, if n_steps=50 and lookup_step=10, last_sequence should be of 60 (that is 50+10) length
     # this last_sequence will be used to predict future stock prices that are not available in the datase
 
-    #To do :
+    # To do :
     # Add last_sequence list and array
     # Add formula X, Y,
     # Train and Test
