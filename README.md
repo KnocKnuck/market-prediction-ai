@@ -11,5 +11,5 @@ The reason for this personnal project is to construct a neural networks in Tenso
 To begin with, you need to install those Tensorflow 2 and different libraries:
 
 ```
-pip3 install tensorflow pandas numpy matplotlib yahoo_fin sklearn
+pip3 install tensorflow pandas numpy matplotlib yahoo_fin sklearn requests_html
 ```
