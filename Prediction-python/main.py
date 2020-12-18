@@ -27,22 +27,6 @@ def shuffle_in_unison(a, b):
     np.random.shuffle(a)
     np.random.shuffle(b)
 
-
-"""
-    Loads data from Yahoo Finance source, as well as scaling, shuffling, normalizing and splitting.
-    Params from Documentation:
-        ticker (str/pd.DataFrame): the ticker you want to load, examples include AAPL, TESL, etc.
-        n_steps (int): the historical sequence length (i.e window size) used to predict, default is 50
-        scale (bool): whether to scale prices from 0 to 1, default is True
-        shuffle (bool): whether to shuffle the dataset (both training & testing), default is True
-        lookup_step (int): the future lookup step to predict, default is 1 (e.g next day)
-        split_by_date (bool): whether we split the dataset into training/testing by date, setting it 
-            to False will split datasets in a random way
-        test_size (float): ratio for test data, default is 0.2 (20% testing data)
-        feature_columns (list): the list of features to use to feed into the model, default is everything grabbed from yahoo_fin
-    """
-
-
 def load_data(ticker, n_steps=50, scale=True, shuffle=True, lookup_step=1, split_by_date=True, test_size=0.2,
               features_columns=['adjclose', 'volume', 'open', 'high', 'low']):
     # Check if market is loaded from yahoo
@@ -59,7 +43,7 @@ def load_data(ticker, n_steps=50, scale=True, shuffle=True, lookup_step=1, split
     # and df
     result['df'] = df.copy()
     # Verification of passed_features
-    for col in feature_columns:
+    for col in features_columns:
         assert col in df.columns, f"{col} doest not exist in the dataframe"
     # show date in column
     if "date" not in df.columns:
@@ -67,7 +51,7 @@ def load_data(ticker, n_steps=50, scale=True, shuffle=True, lookup_step=1, split
     if scale:
         column_scaler = {}
         # Scale data between 0 and 1
-        for column in feature_columns:
+        for column in features_columns:
             scaler = preprocessing.MinMaxScaler()
             df[column] = scaler.fit_transform(np.expand_dims(df[column].values, axis=1))
             column_scaler[column] = scaler
@@ -75,11 +59,11 @@ def load_data(ticker, n_steps=50, scale=True, shuffle=True, lookup_step=1, split
         result["column_scaler"] = column_scaler
     df['future'] = df['adjclose'].shift(-lookup_step)
     # Last step will give NaN for future columns, so we get them before the NaN drop
-    last_sequence = np.array(df[feature_colums].tail(lookup_step))
+    last_sequence = np.array(df[features_columns].tail(lookup_step))
     df.dropna(inplace=True)
     sequence_data = []
-    sequence = deque(maxlen=n_steps)
-    for entry, target in zip(df[feature_columns + ["date"]].values, df[future].values):
+    sequences = deque(maxlen=n_steps)
+    for entry, target in zip(df[features_columns + ["date"]].values, df['future'].values):
         sequences.append(entry)
         if len(sequences) == n_steps:
             sequence_data.append([np.array(sequences), target])
