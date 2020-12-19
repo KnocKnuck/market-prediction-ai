@@ -70,9 +70,36 @@ def load_data(ticker, n_steps=50, scale=True, shuffle=True, lookup_step=1, split
     # get the last sequence by appending the last `n_step` sequence with `lookup_step` sequence
     # for instance, if n_steps=50 and lookup_step=10, last_sequence should be of 60 (that is 50+10) length
     # this last_sequence will be used to predict future stock prices that are not available in the datase
+    last_sequence = list([s[:len(features_columns)] for s in sequences]) + list(last_sequence)
+    last_sequence = np.array(last_sequence).astype(np.float32)
+    result['last_sequence'] = last_sequence
 
-    # To do :
-    # Add last_sequence list and array
-    # Add formula X, Y,
-    # Train and Test
-    # ...
+    ## Add X, Y
+    X, y = [], []
+    for seq, target in sequence_data:
+        X.append(seq)
+        y.append(target)
+    X = np.array(X)
+    y = np.array(y)
+    if split_by_date:
+        # Training and Testing set
+        train_samples = int((1-test_size) * len(X))
+        result["X_train"] = X[:train_samples]
+        result["y_train"] = y[:train_samples]
+        result["X_test"] = X[train_samples:]
+        result["y_test"] = y[train_samples:]
+        if shuffle:
+            #Shuffle for training
+            shuffle_in_unison(result["X_train"], result["y_train"])
+            shuffle_in_unison(result["X_test"], result["y_test"])
+        else:
+            result["X_train"], result["X_test"], result["y_train"], result["y_test"] = train_test_split(X, y, test_size=test_size, shuffle=shuffle)
+
+        #get the list of test set dates
+        dates = result["X_train"][:, -1, -1]
+        result["test_df"] = result["df"].loc[dates]
+        #Remove the columns dates, convert to float32
+        result["X_train"] = result["X_train"][:, :, :len(features_columns)].astype(np.float32)
+        result["X_test"] = result["X_test"][:, :, :len(features_columns)].astype(np.float32)
+        return result
+
