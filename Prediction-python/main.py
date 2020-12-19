@@ -7,13 +7,13 @@ from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 from yahoo_fin import stock_info as si
 from collections import deque
-
+import time
 import os
 import numpy as np
 import pandas as pd
 import random
 
-# Basic setup seed, geet same results after running multiple times
+# Basic setup seed, get same results after running multiple times
 np.random.seed(314)
 tf.random.set_seed(314)
 random.seed(314)
@@ -26,6 +26,7 @@ def shuffle_in_unison(a, b):
     state = np.random.get_state()
     np.random.shuffle(a)
     np.random.shuffle(b)
+
 
 def load_data(ticker, n_steps=50, scale=True, shuffle=True, lookup_step=1, split_by_date=True, test_size=0.2,
               features_columns=['adjclose', 'volume', 'open', 'high', 'low']):
@@ -83,23 +84,107 @@ def load_data(ticker, n_steps=50, scale=True, shuffle=True, lookup_step=1, split
     y = np.array(y)
     if split_by_date:
         # Training and Testing set
-        train_samples = int((1-test_size) * len(X))
+        train_samples = int((1 - test_size) * len(X))
         result["X_train"] = X[:train_samples]
         result["y_train"] = y[:train_samples]
         result["X_test"] = X[train_samples:]
         result["y_test"] = y[train_samples:]
         if shuffle:
-            #Shuffle for training
+            # Shuffle for training
             shuffle_in_unison(result["X_train"], result["y_train"])
             shuffle_in_unison(result["X_test"], result["y_test"])
         else:
-            result["X_train"], result["X_test"], result["y_train"], result["y_test"] = train_test_split(X, y, test_size=test_size, shuffle=shuffle)
+            result["X_train"], result["X_test"], result["y_train"], result["y_test"] = train_test_split(X, y,
+                                                                                                        test_size=test_size,
+                                                                                                        shuffle=shuffle)
 
-        #get the list of test set dates
+        # get the list of test set dates
         dates = result["X_train"][:, -1, -1]
         result["test_df"] = result["df"].loc[dates]
-        #Remove the columns dates, convert to float32
+        # Remove the columns dates, convert to float32
         result["X_train"] = result["X_train"][:, :, :len(features_columns)].astype(np.float32)
         result["X_test"] = result["X_test"][:, :, :len(features_columns)].astype(np.float32)
         return result
+
+
+# Creating model
+
+def create_model(sequence_length, n_features, units=256, cell=LSTM, n_layers=2, dropout=0.3,
+                 loss="mean_absolute_error", optimizer="rmsprop", bidirectional=False):
+    model = Sequential()
+    for i in range(n_layers):
+        if i == 0:
+            if bidirectional:
+                model.add(Bidirectional(cell(units, return_sequences=True),
+                                        batch_input_shape=(None, sequence_length, n_features)))
+            else:
+                model.add(cell(units, return_sequences=True, batch_input_shape=(None, sequence_length, n_features)))
+        elif i == n_layers - 1:
+            if bidirectional:
+                model.add(Bidirectional(cell(units, return_sequences=False)))
+            else:
+                model.add(cell(units, return_sequences=False))
+        else:
+            if bidirectional:
+                model.add(Bidirectional(cell(units, return_sequences=True)))
+            else:
+                model.add(cell(units, return_sequences=True))
+        model.add(Dropout(dropout))
+    model.add(Dense(1, activation="linear"))
+    model.compile(loss=loss, metrics=["mean_absolute_error"], optimizer=optimizer)
+    return model
+
+# Window size or the sequence length
+
+N_STEPS = 50
+#Look up step, 1 is the next day
+LOOKUP_STEP = 15
+# whether to scale feature columns & output price
+SCALE = True
+scale_str = f"sc-{int(SCALE)}"
+SHUFFLE = True
+shuffle_str = f"sh-{int(SHUFFLE)}"
+#wether to split the training/testing set by date
+SPLIT_BY_DATE = False
+split_by_date_str = f"sbd-{int(SPLIT_BY_DATE)}"
+#test ratio size
+TEST_SIZE  = 0.2
+# What columns we use
+FEATURE_COLUMNS = ["adjclose", "volume", "open", "high", "low"]
+# Date
+date_now = time.strftime("%Y-%m-%d")
+
+# Model parameters
+N_LAYERS = 2
+#LSTM cell
+CELL = LSTM
+# Neurones, fitting best combination
+UNITS = 256
+# rate of possible not training node in layer
+DROPOUT = 0.4
+# Bidi
+BIDIRECTIONAL = False
+#training parameters
+LOSS = "mae"
+LOSS = "huber_loss"
+OPTIMIZER = "adam"
+BATCH_SIZZ = 64
+EPOCH = 500
+
+# Trying with TSLA stock market
+
+ticker = "TSLA"
+ticker_data_filename = os.path.join("data", f"{ticker}_{date_now}.csv")
+model_name = f"{date_now}_{ticker}-{shuffle_str}-{scale_str}-{split_by_date_str}-\{LOSS}-{OPTIMIZER}-{CELL.__name__}-seq-{N_STEPS}-step-{LOOKUP_STEP}-layers-{N_LAYERS}-units-{UNITS}"
+if BIDIRECTIONAL:
+    model_name += "-b"
+
+
+
+
+
+
+
+
+
 
