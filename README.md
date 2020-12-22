@@ -60,3 +60,9 @@ And finally, it's showing us the last rows of our CSV results :
 This is tensorboard final train results on mean absolute error :
 ![Image of Tensorboard1](https://joseph-hani.fr/img/projet/market-trade/tensorboard-python-joseph-hani.png)
 
+
+
+That's all !
+Feel free to use and improve it for your personnal projects. 
+
+Big up for Data Science 
