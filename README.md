@@ -1,5 +1,5 @@
 # Python for Finance
-# Predict Stock Market Price using Tensorflow 2 and Tensorboard  
+# Predict Stock Market Price using Tensorflow and Yahoo Finance API
 
 Trading Market Prediction using Tensorflow 2 and Keras 
 tensorflow pandas numpy matplotlib yahoo finance api and sklearn 
